@@ -28,7 +28,7 @@ def get_topic_responses(section_id : int, student_id : int):
 
     test_prefetch = Prefetch(
         'training_test',
-        queryset=Test.objects.filter(question__isnull=False).prefetch_related(question_prefetch).order_by('id').distinct(),
+        queryset=Test.objects.filter(question__isnull=False, question__test_levels=level).prefetch_related(question_prefetch).order_by('id').distinct(),
         to_attr='prefetched_tests'
     )
 
@@ -77,12 +77,13 @@ def get_topic_responses(section_id : int, student_id : int):
             if topic_status == ETestStatus.NOT_AVAILABLE:
                 topic_status = ETestStatus.IN_PROGRESS
 
-            if tests_finished == tests_count or ETestStatus.FINISHED:
+            if tests_finished == tests_count:
                 test_index = tests_finished - 1
             else:
                 test_index = tests_finished
             current_test = tests[test_index] if tests and tests_count > test_index else None
             current_test_id = current_test.id if current_test else None
+
 
             prefetched_questions = current_test.prefetched_questions if current_test else []
             questions_count = len(prefetched_questions) if prefetched_questions else 0
